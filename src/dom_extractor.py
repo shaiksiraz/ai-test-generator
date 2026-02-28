@@ -2,10 +2,18 @@ import re
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
-def extract_url_from_prompt(prompt: str) -> str:
-    """Uses regex to find the first URL in the user's plain English prompt."""
-    match = re.search(r'(https?://[^\s]+)', prompt)
-    return match.group(0) if match else None
+def extract_url_from_feature(feature_text: str) -> str:
+    """Parses a Gherkin feature file text to find the target URL."""
+    # First priority: Look for a URL explicitly inside quotes in a Given step
+    # Example: Given I navigate to "https://playwright.dev"
+    bdd_match = re.search(r'Given.*?["\'](https?://[^"\']+)["\']', feature_text, re.IGNORECASE)
+    
+    if bdd_match:
+        return bdd_match.group(1)
+        
+    # Fallback: Just grab the first valid URL we see in the file
+    fallback_match = re.search(r'(https?://[a-zA-Z0-9./_-]+)', feature_text)
+    return fallback_match.group(0) if fallback_match else None
 
 def get_clean_dom(url: str) -> str:
     """Navigates to the URL, grabs the HTML, and removes unnecessary bloat."""
@@ -34,7 +42,6 @@ def get_clean_dom(url: str) -> str:
 
     # Get the cleaned text, strip extra whitespace, and truncate to save LLM context limits
     clean_html = str(soup)
-    clean_html = re.sub(r'\n\s*\n', '\n', clean_html) # Remove blank lines
+    clean_html = re.sub(r'\n\s*\n', '\n', clean_html) 
     
-    # Return a maximum of 30,000 characters to prevent token overflow
     return clean_html[:30000]
