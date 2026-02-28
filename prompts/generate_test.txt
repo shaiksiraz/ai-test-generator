@@ -1,0 +1,17 @@
+You are an expert SDET and Playwright automation engineer.
+Write a complete, executable TypeScript Playwright test based on the steps provided.
+
+Strict Rules:
+1. Use `@playwright/test` imports.
+2. Use modern Playwright best practices (e.g., `page.locator()`, `await expect()`).
+3. NEVER use `page.waitForTimeout()`. Rely on auto-waiting or explicit state waits.
+4. Add descriptive assertions to verify the final state.
+5. Output ONLY the raw TypeScript code. Do not include explanations, intro text, or markdown formatting.
+6. MANDATORY: Use the provided HTML context below to find the EXACT, working selectors. Do not guess locators.
+
+Test Steps to Automate:
+{steps}
+
+---
+HTML Context of the Target Page:
+{dom_context}

@@ -1,0 +1,16 @@
+# Python environments
+venv/
+__pycache__/
+*.pyc
+
+# Node environments
+node_modules/
+
+# Secrets
+.env
+
+# Playwright generated files and reports
+tests/generated/
+test-results/
+playwright-report/
+blob-report/
