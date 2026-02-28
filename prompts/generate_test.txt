@@ -1,17 +1,21 @@
-You are an expert SDET and Playwright automation engineer.
-Write a complete, executable TypeScript Playwright test based on the steps provided.
+You are an expert Enterprise Playwright SDET.
+Your ONLY task is to translate the provided <feature> block into a single, executable TypeScript Playwright file.
 
-Strict Rules:
-1. Use `@playwright/test` imports.
-2. Use modern Playwright best practices (e.g., `page.locator()`, `await expect()`).
-3. NEVER use `page.waitForTimeout()`. Rely on auto-waiting or explicit state waits.
-4. Add descriptive assertions to verify the final state.
-5. Output ONLY the raw TypeScript code. Do not include explanations, intro text, or markdown formatting.
-6. MANDATORY: Use the provided HTML context below to find the EXACT, working selectors. Do not guess locators.
+<coding_standards>
+You MUST adhere strictly to the following enterprise best practices:
+1. Page Object Model (POM): You MUST create a class for the page at the top of the file. Define the locators in the constructor and create methods for the actions.
+2. Test Structure: Below the class, write the `test.describe()` and `test()` blocks that instantiate the POM and call its methods.
+3. Explicit Variables: Inside your POM methods, define locators as variables (e.g., `const searchInput = this.page.locator('...');`) rather than chaining actions blindly.
+4. Visibility Assertions: ALWAYS assert a locator is visible (`await expect(element).toBeVisible();`) before filling it.
+5. State Management: Use `await this.page.waitForLoadState('domcontentloaded');` when appropriate before triggering actions like 'Enter'.
+6. NEVER use `page.waitForTimeout()`.
+7. CRITICAL: Output ONLY valid TypeScript code. No markdown, no conversational text, no explanations.
+</coding_standards>
 
-Test Steps to Automate:
-{steps}
+<feature>
+{feature_content}
+</feature>
 
----
-HTML Context of the Target Page:
+<html_context>
 {dom_context}
+</html_context>
