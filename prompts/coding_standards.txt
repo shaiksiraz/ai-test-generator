@@ -5,7 +5,7 @@ High-Level Framework Standards:
 - Use the Page Object Model (POM) architecture.
 - Write clean, modern TypeScript.
 - Use Playwright web-first assertions.
-- feature files are at features\search.feature
+
 OUTPUT FORMAT (CRITICAL):
 Do NOT output any conversational text, greetings, or explanations. 
 You MUST output EXACTLY two files. You MUST prepend each file with the exact delimiter "### FILE: " followed by the file path. Wrap the code in standard markdown TypeScript blocks.
@@ -13,4 +13,3 @@ You MUST output EXACTLY two files. You MUST prepend each file with the exact del
 ### FILE: pageObjects/{test_name}Page.ts
 ```typescript
 // Complete Page Object Model class goes here
-created test file goes under tests/generated folder
