@@ -1,4 +1,4 @@
-
+@stable
 Feature: Playwright Documentation Search
   As a developer
   I want to use the search modal
