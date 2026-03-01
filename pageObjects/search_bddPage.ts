@@ -9,7 +9,7 @@ export class SearchBddPage {
   constructor(page: Page) {
     this.page = page;
     this.searchButton = page.locator('button.DocSearch-Button');
-    this.searchInput = page.locator('input.DocSearch-Input');
+    this.searchInput = page.locator('input.DocSearch-Input'); // Corrected locator
     this.searchResult = page.locator('.DocSearch-Hit');
   }
 
@@ -20,16 +20,16 @@ export class SearchBddPage {
 
   async openSearchModal(): Promise<void> {
     await this.searchButton.click();
-    await expect(this.searchInput).toBeVisible();
+    await expect(this.searchInput).toBeVisible(); // Ensure the input is visible after clicking the search button
   }
 
   async searchFor(query: string): Promise<void> {
-    await this.searchInput.type(query, { delay: 100 });
-    await expect(this.searchResult.first()).toBeVisible();
-    await this.searchInput.press('Enter');
+    await this.searchInput.type(query, { delay: 100 }); // Simulate human-like typing
+    await expect(this.searchResult.first()).toBeVisible(); // Wait for the first search result to be visible
+    await this.page.keyboard.press('Enter'); // Press Enter to confirm the search
   }
 
   async verifyUrlContains(text: string): Promise<void> {
-    await expect(this.page).toHaveURL(new RegExp(text));
+    await expect(this.page).toHaveURL(new RegExp(text)); // Verify the URL contains the expected text
   }
 }
