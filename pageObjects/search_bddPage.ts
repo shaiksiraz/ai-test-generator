@@ -1,27 +1,35 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
-export class SearchBDDPage {
+export class SearchBddPage {
   readonly page: Page;
-  readonly searchInput: Locator;
   readonly searchButton: Locator;
-  readonly searchResults: Locator;
+  readonly searchInput: Locator;
+  readonly searchResult: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.searchInput = page.locator('#search-input');
-    this.searchButton = page.locator('#search-button');
-    this.searchResults = page.locator('#search-results');
+    this.searchButton = page.locator('button.DocSearch-Button');
+    this.searchInput = page.locator('input.DocSearch-Input');
+    this.searchResult = page.locator('.DocSearch-Hit');
   }
 
-  async enterSearchTerm(term: string): Promise<void> {
-    await this.searchInput.fill(term);
+  async navigateTo(url: string): Promise<void> {
+    await this.page.goto(url);
+    await expect(this.page).toHaveURL(url);
   }
 
-  async clickSearchButton(): Promise<void> {
+  async openSearchModal(): Promise<void> {
     await this.searchButton.click();
+    await expect(this.searchInput).toBeVisible();
   }
 
-  async getSearchResults(): Promise<string[]> {
-    return await this.searchResults.allTextContents();
+  async searchFor(query: string): Promise<void> {
+    await this.searchInput.type(query, { delay: 100 });
+    await expect(this.searchResult.first()).toBeVisible();
+    await this.searchInput.press('Enter');
+  }
+
+  async verifyUrlContains(text: string): Promise<void> {
+    await expect(this.page).toHaveURL(new RegExp(text));
   }
 }

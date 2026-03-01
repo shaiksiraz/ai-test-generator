@@ -4,12 +4,12 @@ from src.llm_client import ask_llm
 from src.dom_extractor import extract_url_from_feature, get_clean_dom
 
 PROMPT_FILE = Path("prompts/generate_test.txt")
-STANDARDS_FILE = Path("prompts/coding_standards.txt") # 🛠️ NEW: Reference the global standards
+STANDARDS_FILE = Path("prompts/coding_standards.txt")
 
 def generate_test(feature_content: str, test_name: str = "bdd_generated"):
     # Read both files
     template = PROMPT_FILE.read_text(encoding="utf-8")
-    system_context = STANDARDS_FILE.read_text(encoding="utf-8") # 🛠️ NEW: Read the standards
+    system_context = STANDARDS_FILE.read_text(encoding="utf-8")
     
     url = extract_url_from_feature(feature_content)
     dom_context = "No DOM context available."
@@ -21,7 +21,19 @@ def generate_test(feature_content: str, test_name: str = "bdd_generated"):
 
     safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', test_name).lower()
     
-    # 🛠️ NEW: Inject the system_context and dynamically replace the {test_name} inside the standards too!
+    # --- 🧹 NEW: CLEANUP GHOST FILES ---
+    expected_pom = Path(f"pageObjects/{safe_name}Page.ts")
+    expected_spec = Path(f"tests/generated/{safe_name}.spec.ts")
+
+    if expected_pom.exists():
+        expected_pom.unlink()
+        print(f"🗑️ Deleted old POM: {expected_pom}")
+    
+    if expected_spec.exists():
+        expected_spec.unlink()
+        print(f"🗑️ Deleted old Spec: {expected_spec}")
+    # -----------------------------------
+    
     system_context_formatted = system_context.replace("{test_name}", safe_name)
     
     prompt = template.replace("{system_context}", system_context_formatted)\
@@ -32,16 +44,6 @@ def generate_test(feature_content: str, test_name: str = "bdd_generated"):
     print(f"🧠 Translating BDD Feature into Page Object Model architecture...")
     raw_code = ask_llm(prompt)
     
-    print(f"🧠 Translating BDD Feature into Page Object Model architecture...")
-    raw_code = ask_llm(prompt)
-    
-    # 🛠️ DEBUG: Print the raw AI response to the terminal
-    print("\n" + "="*40)
-    print("RAW LLM OUTPUT:")
-    print(raw_code)
-    print("="*40 + "\n")
-    
-    # We now pass the safe_name to the prompt...
     file_blocks = re.split(r'### FILE:\s*', raw_code)[1:] 
     
     if not file_blocks:
@@ -56,8 +58,14 @@ def generate_test(feature_content: str, test_name: str = "bdd_generated"):
         file_path_str = parts[0].strip()
         code_content = parts[1].strip()
         
-        code_content = re.sub(r'^```(?:typescript|ts)?\n', '', code_content, flags=re.MULTILINE)
-        code_content = re.sub(r'\n```$', '', code_content).strip()
+        # Extract ONLY what is inside the ```typescript ... ``` blocks
+        match = re.search(r'```(?:typescript|ts)?\n(.*?)```', code_content, re.DOTALL)
+        
+        if match:
+            code_content = match.group(1).strip()
+        else:
+            # Fallback in case the LLM forgot backticks entirely
+            code_content = code_content.strip()
 
         target_path = Path(file_path_str)
         target_path.parent.mkdir(parents=True, exist_ok=True)
