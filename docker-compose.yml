@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  ai-test-engine:
+    build: .
+    container_name: playwright-ai-engine
+    volumes:
+      # This maps your local folder to the container so generated files appear on your Windows machine instantly!
+      - .:/app
+      # Exclude the container's node_modules from overwriting your local ones
+      - /app/node_modules
+    environment:
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      # Pass any API keys your Python script needs here
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
