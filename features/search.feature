@@ -8,5 +8,5 @@ Feature: Playwright Documentation Search
     Given I navigate to "https://playwright.dev"
     When I click the Search button to open the modal
     And I fill the search input with 'locators'
-    And I press Enter
+    And Select first result appeared (or down arrow to select first in the search result)
     Then I verify the url contains 'locators'
