@@ -1,5 +1,5 @@
 # 1. Use the official Playwright image (includes Node.js and all browser dependencies)
-FROM mcr.microsoft.com/playwright:v1.42.0-jammy
+FROM mcr.microsoft.com/playwright:v1.58.2-jammy
 
 # 2. Install Python 3 and pip
 RUN apt-get update && \

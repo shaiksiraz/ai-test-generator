@@ -30,7 +30,9 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'], 
-        launchOptions: { headless: false } 
+        launchOptions: { 
+        headless: !!process.env.CI || !!process.env.DOCKER 
+    }
       },
     },
 
