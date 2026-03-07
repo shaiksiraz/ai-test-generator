@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  ai-test-engine:
+    build: .
+    container_name: playwright-ai-engine
+    ipc: host   # <--- ADD THIS LINE (Fixes Chromium freezing in Docker)
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      # Pass any API keys your Python script needs here
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - DOCKER=true

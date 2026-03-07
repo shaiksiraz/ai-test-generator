@@ -13,12 +13,13 @@ Activate your internal knowledge of official Playwright documentation and strict
    - Prioritize user-facing locators (`getByRole`, `getByText`, `getByPlaceholder`). 
    - Only fall back to CSS/XPath if a robust `getByRole` is impossible. Use clean CSS classes (e.g., `.DocSearch-Button`) over complex hierarchies.
 
-3. Dynamic Synchronization & Human-Like Typing: 
+3. Dynamic Synchronization (Static DOM Warning): 
    - NEVER use `page.waitForTimeout()`.
    - Note: The provided <html_context> is a STATIC scrape. It does not contain dynamic UI states.
-   - For auto-complete or dynamic search bars, NEVER use `.fill()`. You MUST simulate human typing using `await locator.pressSequentially(query, { delay: 100 })` to ensure frontend event listeners fire.
-   - After typing, you MUST explicitly wait for the resulting UI state to load (e.g., `await expect(this.page.locator('.DocSearch-Hit').first()).toBeVisible();`) BEFORE pressing 'Enter' or clicking a result.
-
+   - For auto-complete or dynamic search bars, NEVER use `.fill()`. You MUST simulate human typing using `await locator.pressSequentially(query, { delay: 100 })`.
+   - After typing, explicitly wait for the dropdown result (e.g., `await expect(this.page.locator('.DocSearch-Hit').first()).toBeVisible();`).
+   - ALWAYS explicitly `.click()` the dropdown result. NEVER rely on `page.keyboard.press('Enter')` for dynamic search bars.
+   
 4. Page Object Model (POM) Integrity: 
    - Encapsulate all page interactions within standard POM classes.
    - Define locators inside the constructor.

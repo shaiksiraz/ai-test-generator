@@ -2,20 +2,35 @@ import argparse
 from src.test_generator import generate_test, heal_test
 import subprocess
 
-def run_and_heal(safe_name: str, dom_context: str, retries: int = 2):
+import subprocess
+import shutil  # <--- Add this import
+
+def run_and_heal(safe_name: str, dom_context: str, retries: int = 2, is_headed: bool = False):
     test_file_path = f"tests/generated/{safe_name}.spec.ts"
     
     for attempt in range(retries + 1):
         print(f"\n🚀 Running Playwright test (Attempt {attempt + 1}/{retries + 1})...")
         
-        
-        # Use subprocess to CAPTURE the terminal output
+        # 1. OS-Agnostic Executable Resolver
+        npx_path = shutil.which("npx") 
+        if not npx_path:
+            print("❌ Error: 'npx' command not found. Is Node.js installed?")
+            return False
+            
+        # 2. Build the command list cleanly
+        cmd = [npx_path, "playwright", "test", test_file_path]
+        if is_headed:
+            cmd.append("--headed")
+            
+        # 3. Execute safely without shell hacks
         result = subprocess.run(
-            ["npx", "playwright", "test", test_file_path, "--headed"],
+            cmd,
             capture_output=True,
             text=True,
-            shell=True  # <--- ADD THIS LINE
+            shell=False  # Clean, secure, cross-platform
         )
+        
+        # ... (keep the rest of your pass/fail/heal logic exactly the same) ...
         
         if result.returncode == 0:
             print("✅ Test Passed Successfully!")
@@ -61,4 +76,4 @@ if __name__ == "__main__":
     
     # 4. Trigger the Execution and Self-Healing Loop if '--run' is passed
     if args.run:
-        run_and_heal(safe_name, dom_context)
+        run_and_heal(safe_name, dom_context, is_headed=args.headed)
