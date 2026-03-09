@@ -1,11 +1,12 @@
 name: AI Automation Pipeline
 
-# Trigger the pipeline every time code is pushed to the main branch
+# Trigger the pipeline on pushes to main OR master
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   execute-tests:
