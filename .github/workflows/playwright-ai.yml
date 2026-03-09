@@ -27,6 +27,14 @@ jobs:
       - name: 🤖 Run AI Generator and Playwright Tests
         run: docker exec -e GITHUB_TOKEN="${{ secrets.AI_API_KEY }}" playwright-ai-engine python3 generate.py features/search.feature --name search_bdd --run
 
+      - name: 📊 Upload Playwright HTML Report
+        uses: actions/upload-artifact@v4
+        if: always() # <--- Always Uploads the report even if the tests fail!
+        with:
+          name: playwright-ai-report
+          path: playwright-report/
+          retention-days: 14
+
       - name: 🛑 Shut Down Docker
         if: always()
         run: docker compose down
