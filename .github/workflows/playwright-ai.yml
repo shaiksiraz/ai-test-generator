@@ -1,0 +1,34 @@
+name: AI Automation Pipeline
+
+# Trigger the pipeline every time code is pushed to the main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  execute-tests:
+    # GitHub provides a free Ubuntu Linux server to run our job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Start Dual-Stack Docker Environment
+        # This is why we built docker-compose! One command sets up everything in the cloud.
+        run: |
+          docker-compose build
+          docker-compose up -d
+
+      - name: 🤖 Run AI Generator and Playwright Tests
+        # We execute the exact same headless command you ran locally
+        run: docker exec playwright-ai-engine python3 generate.py features/search.feature --name search_bdd --run
+        env:
+          # If your Python script uses the GitHub Models API, it needs the secret token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🛑 Shut Down Docker
+        if: always()
+        run: docker-compose down
