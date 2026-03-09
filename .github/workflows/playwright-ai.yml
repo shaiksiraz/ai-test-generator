@@ -18,16 +18,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🐳 Start Dual-Stack Docker Environment
-        # This is why we built docker compose! One command sets up everything in the cloud.
         run: |
           docker compose build
           docker compose up -d
+        env:
+          GITHUB_TOKEN: ${{ secrets.AI_API_KEY }}
 
       - name: 🤖 Run AI Generator and Playwright Tests
-        run: docker exec playwright-ai-engine python3 generate.py features/search.feature --name search_bdd --run
-        env:
-          # The Python script wants 'GITHUB_TOKEN', so we feed it your custom secret!
-          GITHUB_TOKEN: ${{ secrets.AI_API_KEY }}
+        run: docker exec -e GITHUB_TOKEN="${{ secrets.AI_API_KEY }}" playwright-ai-engine python3 generate.py features/search.feature --name search_bdd --run
 
       - name: 🛑 Shut Down Docker
         if: always()
