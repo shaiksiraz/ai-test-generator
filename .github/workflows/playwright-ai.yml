@@ -23,11 +23,10 @@ jobs:
           docker-compose up -d
 
       - name: 🤖 Run AI Generator and Playwright Tests
-        # We execute the exact same headless command you ran locally
         run: docker exec playwright-ai-engine python3 generate.py features/search.feature --name search_bdd --run
         env:
-          # If your Python script uses the GitHub Models API, it needs the secret token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The Python script wants 'GITHUB_TOKEN', so we feed it your custom secret!
+          GITHUB_TOKEN: ${{ secrets.AI_API_KEY }}
 
       - name: 🛑 Shut Down Docker
         if: always()
