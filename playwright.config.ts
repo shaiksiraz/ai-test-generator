@@ -1,8 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * @see https://playwright.dev/docs/test-configuration
- */
 export default defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel */
@@ -17,30 +14,31 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'https://playwright.dev',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    /* Collect trace when retrying the failed test. */
     trace: 'on-first-retry',
+    
+    /* 📸 AI VISION HOOK: Automatically capture a screenshot when a test fails */
+    screenshot: 'only-on-failure',
+
+    /* 🐳 DOCKER/CI HOOK: Run headlessly in pipelines, visually on local machines */
+    launchOptions: {
+      headless: !!process.env.CI || !!process.env.DOCKER
+    }
   },
 
-  /* Configure projects for major browsers */
+  /* -------------------------------------------------------------------------- */
+  /* CONFIGURE PROJECTS FOR MAJOR BROWSERS                                      */
+  /* -------------------------------------------------------------------------- */
   projects: [
     {
       name: 'chromium',
-      use: { 
-        ...devices['Desktop Chrome'], 
-        launchOptions: { 
-        headless: !!process.env.CI || !!process.env.DOCKER 
-    }
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
-
+    /* Uncomment below to test against other browsers */
     // {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] },
     // },
-
     // {
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },

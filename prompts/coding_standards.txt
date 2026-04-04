@@ -9,7 +9,8 @@ Activate your internal knowledge of official Playwright documentation and strict
 
 2. Resilient Locators & Amnesia: 
    - You MUST extract locators ONLY from the provided <html_context> block.
-   - Do NOT use your internal memory of what the website looks like. Do NOT hallucinate keyboard shortcuts like "(Command+K)" unless explicitly written in the DOM context.
+   - Do NOT use your internal memory of what the website looks like.
+   - Do NOT hallucinate keyboard shortcuts like "(Command+K)" unless explicitly written in the DOM context.
    - Prioritize user-facing locators (`getByRole`, `getByText`, `getByPlaceholder`). 
    - Only fall back to CSS/XPath if a robust `getByRole` is impossible. Use clean CSS classes (e.g., `.DocSearch-Button`) over complex hierarchies.
 
@@ -21,23 +22,21 @@ Activate your internal knowledge of official Playwright documentation and strict
    - ALWAYS explicitly `.click()` the dropdown result. NEVER rely on `page.keyboard.press('Enter')` for dynamic search bars.
    
 4. Page Object Model (POM) Integrity: 
-   - Encapsulate all page interactions within standard POM classes.
-   - Define locators inside the constructor.
+   - Encapsulate all page interactions within standard POM classes. Define locators inside the constructor.
    - Keep test files clean; all complex logic, clicks, and typing must reside in the POM methods.
 
 5. THE IMPORT RULE: 
-   - Because you are generating code sequentially, you MUST explicitly import `expect` at the very top of your Page Object Model file (`import { Page, Locator, expect } from '@playwright/test';`). Do NOT forget `expect`.
+   - You MUST explicitly import `expect` AND `test` at the very top of your Page Object Model file (`import { Page, Locator, expect, test } from '@playwright/test';`). Do NOT forget them.
+
+6. Human-Readable Reporting (test.step):
+   - ALL methods inside Page Object Models that perform actions MUST wrap their logic inside a Playwright `test.step`.
+   - The step description must be clear, professional, and business-readable (e.g., "Entered value in the edit box - 'xyz'", "Clicked button - 'Search'").
+   - Example implementation:
+     await test.step(`Searched for item: "${itemName}"`, async () => {
+         await this.searchInput.pressSequentially(itemName, { delay: 100 });
+         await this.submitBtn.click();
+     });
 
 APPLICATION-SPECIFIC STANDARDS:
-1. You MUST read the <feature> block below and automate those exact Gherkin steps. Do not invent scenarios or write mock "example.com" tests.
-2. You MUST read the <html_context> block below to extract the real DOM elements.
-
-OUTPUT FORMAT (CRITICAL PARSING RULES):
-Our CI/CD pipeline requires a strict multi-file format. You MUST output EXACTLY two files using the exact delimiters below. 
-- Do NOT output conversational text, greetings, or explanations.
-- Do NOT rename the file paths provided in the template.
-- CRITICAL: You MUST include all necessary Playwright imports at the top of your files (e.g., `import { test, expect, Page, Locator } from '@playwright/test';`). Do not assume `expect` is global.
-
-### FILE: pageObjects/{test_name}Page.ts
-```typescript
-// Complete Page Object Model class goes here
+1. You MUST read the <feature> block and automate those exact Gherkin steps. Do not invent scenarios or write mock "example.com" tests.
+2. You MUST read the <html_context> block to extract the real DOM elements.
