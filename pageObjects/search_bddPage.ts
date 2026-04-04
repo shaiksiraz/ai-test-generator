@@ -1,10 +1,10 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator, expect, test } from '@playwright/test';
 
-export class SearchBDDPage {
-  readonly page: Page;
-  readonly searchButton: Locator;
-  readonly searchInput: Locator;
-  readonly firstSearchResult: Locator;
+export class SearchPage {
+  private readonly page: Page;
+  private readonly searchButton: Locator;
+  private readonly searchInput: Locator;
+  private readonly firstSearchResult: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -14,25 +14,35 @@ export class SearchBDDPage {
   }
 
   async navigateTo(url: string): Promise<void> {
-    await this.page.goto(url);
-    await expect(this.page).toHaveURL(url);
+    await test.step(`Navigate to URL: ${url}`, async () => {
+      await this.page.goto(url);
+      await expect(this.page).toHaveURL(url);
+    });
   }
 
   async openSearchModal(): Promise<void> {
-    await this.searchButton.click();
-    await expect(this.searchInput).toBeVisible();
+    await test.step('Click the Search button to open the modal', async () => {
+      await this.searchButton.click();
+      await expect(this.searchInput).toBeVisible();
+    });
   }
 
   async searchFor(query: string): Promise<void> {
-    await this.searchInput.type(query, { delay: 100 });
-    await expect(this.firstSearchResult).toBeVisible();
+    await test.step(`Fill the search input with '${query}'`, async () => {
+      await this.searchInput.pressSequentially(query, { delay: 100 });
+      await expect(this.firstSearchResult).toBeVisible();
+    });
   }
 
   async selectFirstSearchResult(): Promise<void> {
-    await this.firstSearchResult.click();
+    await test.step('Select the first result from the search dropdown', async () => {
+      await this.firstSearchResult.click();
+    });
   }
 
-  async verifyUrlContains(text: string): Promise<void> {
-    await expect(this.page).toHaveURL(new RegExp(text));
+  async verifyUrlContains(expectedText: string): Promise<void> {
+    await test.step(`Verify the URL contains '${expectedText}'`, async () => {
+      await expect(this.page).toHaveURL(new RegExp(expectedText));
+    });
   }
 }

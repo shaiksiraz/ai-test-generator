@@ -1,13 +1,19 @@
 import os
+import base64
 from openai import OpenAI
 from dotenv import load_dotenv
 
 # Load environment variables from .env
 load_dotenv()
 
-def ask_llm(prompt: str) -> str:
+def encode_image(image_path: str) -> str:
+    """Reads an image file and converts it to a Base64 string."""
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+def ask_llm(prompt: str, image_path: str = None) -> str:
     """
-    Sends the prompt to the Primary API (GitHub Models). 
+    Sends the prompt (and optional image) to the Primary API (GitHub Models). 
     If it fails, automatically routes to the Fallback API.
     """
     
@@ -20,12 +26,23 @@ def ask_llm(prompt: str) -> str:
     fallback_model = os.getenv("OPENAI_MODEL_NAME", "llama-3.3-70b-versatile")
     fallback_base = os.getenv("OPENAI_BASE_URL")
 
+    # 3. Build the User Message Content (Text vs. Multimodal)
+    if image_path and os.path.exists(image_path):
+        print(f"📸 Attaching crash screenshot to AI context: {image_path}")
+        base64_image = encode_image(image_path)
+        user_content = [
+            {"type": "text", "text": prompt},
+            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{base64_image}"}}
+        ]
+    else:
+        # If no image is provided, we default to the standard text string
+        user_content = prompt
+
     # --- PRIMARY EXECUTION ---
     if github_token:
         try:
             print(f"🔌 Routing request to Primary API: GitHub Models ({github_model})...")
             
-            # GitHub Models uses the Azure Inference endpoint
             client = OpenAI(
                 base_url="https://models.inference.ai.azure.com",
                 api_key=github_token
@@ -35,9 +52,9 @@ def ask_llm(prompt: str) -> str:
                 model=github_model,
                 messages=[
                     {"role": "system", "content": "You are a strict, enterprise-grade test automation architect."},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": user_content}
                 ],
-                temperature=0.1 # Keep temperature low for deterministic code generation
+                temperature=0.1
             )
             
             return response.choices[0].message.content
@@ -52,6 +69,11 @@ def ask_llm(prompt: str) -> str:
         
     print(f"🔌 Routing request to Fallback API ({fallback_model})...")
     
+    # Architect Warning: If falling back to a text-only model like Llama 3 while holding an image, 
+    # the API will likely reject it. We pass it through anyway to let the API handle the error natively.
+    if image_path and "llama" in fallback_model.lower():
+        print("⚠️ WARNING: Fallback model appears to be text-only, but an image is attached. This may fail.")
+
     client_args = {"api_key": fallback_key}
     if fallback_base:
          client_args["base_url"] = fallback_base
@@ -62,7 +84,7 @@ def ask_llm(prompt: str) -> str:
         model=fallback_model,
         messages=[
             {"role": "system", "content": "You are a strict, enterprise-grade test automation architect."},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": user_content}
         ],
         temperature=0.1
     )
